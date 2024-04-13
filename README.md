@@ -1,5 +1,13 @@
 # HW-3 Readme: Analysis of COVID-19 Data
 
+## Project Description
+
+This project used two existing data frames from a clean Rdata set from Project 1 (data_long and data_wide). Dataset manipulation and 
+cleaning was first done in Rstudio session then all other manipulations were done inside the Spark session, locally. We opted to do Spark on the local machine
+after many unsuccessful attempts using AWS (Amazon Web Services), a cloud based application where in theory, one could use Spark to complete this project. 
+
+##  Repository Organization
+The folder structure can be found here [https://github.com/crice0023/HW-1/tree/main].
 
 ## Session Info
 
