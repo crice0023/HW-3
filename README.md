@@ -22,6 +22,8 @@ The highest rise in cases over time occurred in the United States, followed by G
 
 The highest change of rate of cases over time occurred in Germany, followed by United States and Japan, respectively.
 
+
+![image](https://github.com/crice0023/HW-3/tree/main/Rmarkdown)
 ## Interpretation of Regression Results
 
 The intercept of 11.3086 translates to about 81,520 total COVID-19 cases when "Country_Region" is at its reference level and "days_since_start" is zero, assuming a nominal or baseline population value for the reference region, rather than zero. This would represent the estimated number of cases at the very start of data tracking or the outbreak in that baseline region.
