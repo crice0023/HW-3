@@ -1,0 +1,216 @@
+---
+title: "HW-3 Rmarkdown: Analysis of COVID-19 Data"
+author: "Chris Rice"
+date: "2024-04-09"
+output: html_document
+---
+
+
+This project used two existing csv files from Project 1. Dataset manipulation and 
+cleaning was first done in Rstudio then all other manipulations were done inside
+the Spark session, locally. For Rmarkdown simplicity, a data frame called 
+"spark_subset" was saved to be used as a reference for the two ggplots below. 
+
+```{r setup-libraries, include=FALSE}
+library(sparklyr)
+library(kableExtra)
+library(broom)
+library(ggplot2)
+
+```
+
+The code below that is commented out shows the steps the analyst underwent to prepare
+the 2 imported CSVs into a merged data set. We had to do some moderate cleaning such as 
+removing "X" from the date columns and reformatting the date column. In addition, we 
+created the numeric column "days_since_start" so that the linear regression could be 
+performed. Once that was in place then we proceeded with creating two graphs that are shown below.
+
+Take note, we can see the where the Spark connection begins. After connecting and running
+things in Spark, locally,  we created the ggplots. Initially, we tried to connect to Spark using 
+an AWS server but this attempt was unsuccessful. 
+
+```{r load-data, echo=TRUE, warning = FALSE}
+
+#Here is the code to prepare Project 1 datasets: 
+
+# Convert dataset to long format
+#data_long <- pivot_longer(
+  #data_wide,
+  #cols = starts_with("X"),
+  #names_to = "date",
+  #values_to = "cases"
+#)
+
+# Remove the leading 'X' from the date column and replace dots with slashes
+# data_long <- data_long %>%
+#   mutate(date = gsub("^X", "", date),
+#          date = gsub("\\.", "/", date))
+
+#data_long <- data_long %>%
+  #mutate(date = as.Date(date, format = "%m/%d/%y")) # Adjust format as necessary
+
+# Find the start date
+#start_date <- min(data_long$date, na.rm = TRUE)
+
+# Calculate days since start
+# data_long <- data_long %>%
+#   mutate(days_since_start = as.numeric(date - start_date))
+# 
+# #data_long <- data_long %>%
+#   mutate(rate = (cases / Population) * 100000) # This calculates rate per 100,000 population
+
+######## Begin SPARK Activities ##############################################
+# 
+# 
+# library(sparklyr)
+# 
+# sc <- spark_connect(master = "local")
+# 
+# # Copy the data frame to Spark
+# spark_data_long <- sdf_copy_to(sc, data_long, "data_long", overwrite = TRUE)
+# 
+# 
+# library(dplyr)
+# library(ggplot2)
+# 
+# 
+# # Assuming 'Country_Region' is the column with country names
+# countries_of_interest <- c("Germany", "China", "Japan", "United Kingdom", "US", "Brazil", "Mexico")
+# 
+# filtered_spark_data_long <- spark_data_long %>%
+#   filter(Country_Region %in% countries_of_interest)
+# 
+# # check columns
+# colnames(filtered_spark_data_long)
+# 
+# # Collect a smaller, relevant subset since full dataset is too large
+# spark_subset <- filtered_spark_data_long %>%
+#   select(Country_Region, date, cases, rate, Population, days_since_start) %>%
+#   collect()
+# 
+# spark_subset <- filtered_spark_data_long %>%
+#   group_by(Country_Region, date) %>%
+#   summarise(
+#     total_cases = sum(cases, na.rm = TRUE),
+#     average_rate = mean(rate, na.rm = TRUE),
+#     Population = max(Population, na.rm = TRUE),
+#     days_since_start = sum(days_since_start, na.rm = TRUE),
+#     .groups = "drop"  # This will remove all grouping from the resulting data frame
+#   ) %>%
+#   collect()
+
+load("C:/Users/ricecakes/Desktop/Git1/HW-3/HW-3/spark_subset.RData")
+
+ggplot(spark_subset, aes(x = date, y = total_cases, color = Country_Region)) +
+  geom_line() +
+  labs(title = "Change in the Number of Cases by Country and Date",
+       x = "Date", y = "Total Cases") +
+  theme_minimal()
+```
+
+#### Graph 1: displays our project's selected countries and change in cases
+
+As we can observe in the graph above, the highest rise in cases over time occurred in the 
+United States, followed by Germany and Brazil, respectively.
+
+```{r echo=TRUE, warning = FALSE}
+
+ggplot(spark_subset, aes(x = date, y = average_rate, color = Country_Region)) +
+  geom_line() +
+  labs(title = "Change in the Rate of Cases by Country and Date",
+       x = "Date", y = "Rate of Cases") +
+  theme_minimal()
+
+```
+
+#### Graph 2: displays our project's selected countries and change in cases
+
+As we can observe in the graph above, the highest change of rate of cases over time occurred in Germany, followed by United States and Japan, respectively.
+
+# Linear Regression 1
+
+```{r fit-model-local, echo=TRUE, warning=FALSE}
+
+load("C:/Users/ricecakes/Desktop/Git1/HW-3/HW-3/spark_data_subset_r.RData")
+
+model_local <- lm(
+  log_total_cases ~ Country_Region + Population + days_since_start, 
+  data = spark_data_subset_r
+)
+
+# Tidy and display the model using broom and kableExtra
+tidied_model_local <- tidy(model_local)
+
+kable(tidied_model_local, caption = "Regression Model Summary", format = "html", 
+      col.names = c("Term", "Estimate", "Std. Error", "Statistic", "P-value"),
+      digits = c(3, 4, 4, 3, 20),
+      align = c('l', 'r', 'r', 'r', 'r')) %>%
+  kable_styling(bootstrap_options = c("striped", "hover"))
+
+
+```
+
+#### Linear Regression showing the relationship between log cases and model vars. 
+
+
+*Note:* Population is yielding NA results, above. In fact, no matter the order used in 
+"model_local" the variable produces NA results.Therefore, and after many attempts with data manipulation around the variable Population, to include removing NAs and even scaling, we opted to remove "Country_Region" from the "Linear Regression 2" below.
+This was the work around to complete the task. If future time exists more trouble shooting would be advised. 
+
+# Linear Regression 2
+
+```{r fit-model-local_2, echo=TRUE, warning=FALSE}
+
+
+load("C:/Users/ricecakes/Desktop/Git1/HW-3/HW-3/spark_data_subset_r.RData")
+
+spark_data_subset_r$Population_in_millions <- spark_data_subset_r$Population / 1e6
+
+model_local <- lm(
+  log_total_cases ~ days_since_start + Population_in_millions, 
+  data = spark_data_subset_r
+)
+
+# Tidy and display the model using broom and kableExtra
+tidied_model_local <- tidy(model_local)
+
+kable(tidied_model_local, caption = "Regression Model Summary", format = "html", 
+      col.names = c("Term", "Estimate", "Std. Error", "Statistic", "P-value"),
+      digits = c(3, 4, 4, 3, 20),
+      align = c('l', 'r', 'r', 'r', 'r')) %>%
+  kable_styling(bootstrap_options = c("striped", "hover"))
+
+```
+
+## Interpretation of Regression Results
+
+The intercept of 11.3086 translates to about 81,520 total COVID-19 cases when "Country_Region" is at its reference level and "days_since_start" is zero, assuming a nominal or baseline population value for the reference region, rather than zero. This would represent the estimated number of cases at the very start of data tracking or the outbreak in that baseline region.
+
+### China Estimate (lowest estimate in the model)
+  Based on the regression model's estimate, the total COVID-19 cases for China, when "days_since_start" is zero and assuming other variables are at their baseline or reference levels, would be approximately 4,741 cases. This reflects a significant decrease compared to the baseline country or region due to the -2.8446 coefficient associated with China in the model.
+
+### United States Estimate (highest estimate in the model)
+  Based on the regression model's estimate, when "days_since_start" is zero and assuming other variables are at their baseline or reference levels, the total COVID-19 cases for the United States would be approximately 231,863 cases. This represents a significant increase in cases compared to the baseline country or region, reflecting the 1.0453 coefficient increase associated with the United States in the model.
+
+### days_since_start Estimate
+  Based on the model's estimate of 0.0072:
+
+After 1 day since the start of the dataset, the total COVID-19 cases are projected to increase to approximately 82,109, up from about 81,520 at the start.
+
+After 10 days, the total COVID-19 cases are projected to reach approximately 87,606.
+
+This demonstrates the cumulative effect of the daily increase in the logarithm of cases, with a coefficient of 0.0072. Each day contributes to a small but consistent rise in the number of cases, illustrating how the situation can escalate over time if other factors remain constant.
+
+### t-statistic and p value: United States
+
+The statistic column, otherwise known as the t-statistic for Country_RegionUS is 12.082 standard deviations away from zero and robust, while the p-value is extremely low. Hence, it provides very strong evidence that the coefficient for Country_RegionUS is significantly different from zero. This indicates that the model provides strong statistical evidence that the factor Country_RegionUS has a significant positive effect on the log of total COVID-19 cases, compared to the reference category in the model.
+
+The statistic and P-value for Country_RegionUS clearly suggest a significant and impactful relationship between being in the US and the number of COVID cases, after controlling for other factors in the model such as population and days since the start of the pandemic.
+
+### Regression 2 Interpretation
+
+The intercept of 10.792 in your regression model corresponds to approximately 48,630 total COVID-19 cases. This represents the model's estimate for the number of cases at the starting point (zero days since the start) and in a minimal population scenario (hypothetical zero million population).
+
+The Population_in_Millions t-statistic of -23.845, while negative, is also highly significant. This indicates that the predictor is statistically significant and the relationship it shows is reliable according to the model. The negative sign indicates that higher population figures are associated with a decrease in the logarithm of total COVID-19 cases.
+
+The days_since_start t-statistic is 91.797 These t-statistics suggest that both the number of days since the start and the population size (despite the inverse nature) are crucial factors in predicting the log of COVID-19 cases, with very high levels of statistical certainty.
