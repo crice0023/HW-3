@@ -10,10 +10,15 @@ after many unsuccessful attempts using AWS (Amazon Web Services), a cloud based 
 The folder structure can be found here [https://github.com/crice0023/HW-3/tree/main].
 
 For any users interested in replicating the project they can find two folders to accomplish this task using the link above. 
+
 ![image](https://github.com/crice0023/HW-3/assets/161267590/f4bc6a92-9f04-4f7c-83d9-3a1dfd7fb3f0)
 
 ## Main Findings
 ![image](https://github.com/crice0023/HW-3/blob/main/Rplot.png)
+
+![image](https://github.com/crice0023/HW-3/blob/main/Rplot01.png)
+
+
 ## Session Info
 
 <pre>
