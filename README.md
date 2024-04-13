@@ -7,7 +7,9 @@ cleaning was first done in Rstudio session then all other manipulations were don
 after many unsuccessful attempts using AWS (Amazon Web Services), a cloud based application where in theory, one could use Spark to complete this project. 
 
 ##  Repository Organization
-The folder structure can be found here [https://github.com/crice0023/HW-1/tree/main].
+The folder structure can be found here [https://github.com/crice0023/HW-3/tree/main].
+For any users interested in replicating the project they can find two folders to accomplish this task. 
+
 
 ## Session Info
 
