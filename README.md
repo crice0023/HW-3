@@ -22,7 +22,38 @@ The highest rise in cases over time occurred in the United States, followed by G
 
 The highest change of rate of cases over time occurred in Germany, followed by United States and Japan, respectively.
 
+## Interpretation of Regression Results
 
+The intercept of 11.3086 translates to about 81,520 total COVID-19 cases when "Country_Region" is at its reference level and "days_since_start" is zero, assuming a nominal or baseline population value for the reference region, rather than zero. This would represent the estimated number of cases at the very start of data tracking or the outbreak in that baseline region.
+
+### China Estimate (lowest estimate in the model)
+  Based on the regression model's estimate, the total COVID-19 cases for China, when "days_since_start" is zero and assuming other variables are at their baseline or reference levels, would be approximately 4,741 cases. This reflects a significant decrease compared to the baseline country or region due to the -2.8446 coefficient associated with China in the model.
+
+### United States Estimate (highest estimate in the model)
+  Based on the regression model's estimate, when "days_since_start" is zero and assuming other variables are at their baseline or reference levels, the total COVID-19 cases for the United States would be approximately 231,863 cases. This represents a significant increase in cases compared to the baseline country or region, reflecting the 1.0453 coefficient increase associated with the United States in the model.
+
+### days_since_start Estimate
+  Based on the model's estimate of 0.0072:
+
+After 1 day since the start of the dataset, the total COVID-19 cases are projected to increase to approximately 82,109, up from about 81,520 at the start.
+
+After 10 days, the total COVID-19 cases are projected to reach approximately 87,606.
+
+This demonstrates the cumulative effect of the daily increase in the logarithm of cases, with a coefficient of 0.0072. Each day contributes to a small but consistent rise in the number of cases, illustrating how the situation can escalate over time if other factors remain constant.
+
+### t-statistic and p value: United States
+
+The statistic column, otherwise known as the t-statistic for Country_RegionUS is 12.082 standard deviations away from zero and robust, while the p-value is extremely low. Hence, it provides very strong evidence that the coefficient for Country_RegionUS is significantly different from zero. This indicates that the model provides strong statistical evidence that the factor Country_RegionUS has a significant positive effect on the log of total COVID-19 cases, compared to the reference category in the model.
+
+The statistic and P-value for Country_RegionUS clearly suggest a significant and impactful relationship between being in the US and the number of COVID cases, after controlling for other factors in the model such as population and days since the start of the pandemic.
+
+### Regression 2 Interpretation
+
+The intercept of 10.792 in your regression model corresponds to approximately 48,630 total COVID-19 cases. This represents the model's estimate for the number of cases at the starting point (zero days since the start) and in a minimal population scenario (hypothetical zero million population).
+
+The Population_in_Millions t-statistic of -23.845, while negative, is also highly significant. This indicates that the predictor is statistically significant and the relationship it shows is reliable according to the model. The negative sign indicates that higher population figures are associated with a decrease in the logarithm of total COVID-19 cases.
+
+The days_since_start t-statistic is 91.797 These t-statistics suggest that both the number of days since the start and the population size (despite the inverse nature) are crucial factors in predicting the log of COVID-19 cases, with very high levels of statistical certainty.
 ## Session Info
 
 <pre>
