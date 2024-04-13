@@ -16,7 +16,11 @@ For any users interested in replicating the project they can find two folders to
 ## Main Findings
 ![image](https://github.com/crice0023/HW-3/blob/main/Rplot.png)
 
+The highest rise in cases over time occurred in the United States, followed by Germany and Brazil, respectively.
+
 ![image](https://github.com/crice0023/HW-3/blob/main/Rplot01.png)
+
+The highest change of rate of cases over time occurred in Germany, followed by United States and Japan, respectively.
 
 
 ## Session Info
